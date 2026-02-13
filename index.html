@@ -61,13 +61,13 @@
 <div class="container animate-in" id="main-card">
     <div class="animate-in delay-1">
         <h1>お知らせ</h1>
-        <p>サーバー稼働状況は複数のAPIでリアルタイム監視されています。</p>
+        <p>サーバーに関する最新情報をお届けします。<br>不具合かな？と思ったらまずはここを見てください。</p>
     </div>
 
     <div class="button-group animate-in delay-2">
         <div id="status-notice">※現在サーバーに接続できない可能性があります</div>
         <a href="HealthCheck.html" id="health-btn" class="btn btn-primary">📡 サーバー稼働状況を確認</a>
-        <a href="YOUR_GOOGLE_FORMS_URL" class="btn btn-secondary">⚠️ 不具合を報告する</a>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfYpRkqudUwY7FUMfVmwwBVFq3KMSIQOSIZdLeGIoXcnQAYbg/viewform?usp=header" class="btn btn-secondary">⚠️ 不具合を報告する</a>
     </div>
 
     <div class="animate-in delay-3">
@@ -78,8 +78,8 @@
 
 <script>
     const serverIP = 'namasutee.duckdns.org:3315'; // ★DuckDNSのアドレス
-    const hasIssue = true; // 手動メンテフラグ
-    const manualMessage = "現在アップデートメンテナンス中です。メンテナンス終了推定時刻は19:30です。延長されました";
+    const hasIssue = false; // 手動メンテフラグ
+    const manualMessage = "現在メンテナンス中です。終了までお待ちください。";
 
     // 二重化されたステータスチェック関数
     async function getStatusWithFallback() {
