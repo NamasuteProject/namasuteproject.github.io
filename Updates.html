@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MinecraftServer - アップデート情報</title>
+    <style>
+        /* --- デザイン統一 --- */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-in { animation: fadeInUp 0.6s ease-out both; }
+        
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #1a1a1a; color: #e0e0e0; margin: 0;
+            display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding-top: 50px;
+        }
+
+        .container {
+            width: 90%; max-width: 700px; background: #2d2d2d; padding: 2.5rem;
+            border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            border-top: 5px solid #3fb0ac; margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 1.8rem; color: #3fb0ac; border-bottom: 2px solid #3d3d3d;
+            padding-bottom: 10px; margin-bottom: 30px; display: flex; align-items: center;
+        }
+        h1::before { content: '🛠️'; margin-right: 15px; }
+
+        /* --- タイムライン（更新履歴）のスタイル --- */
+        .update-item {
+            position: relative; padding-left: 30px; border-left: 2px solid #3d3d3d;
+            margin-bottom: 40px;
+        }
+        .update-item::before {
+            content: ''; position: absolute; left: -7px; top: 0;
+            width: 12px; height: 12px; border-radius: 50%; background: #3fb0ac;
+            box-shadow: 0 0 10px #3fb0ac;
+        }
+
+        .update-date { font-size: 0.85rem; color: #777; font-weight: bold; margin-bottom: 5px; }
+        .update-title { font-size: 1.2rem; color: #fff; font-weight: bold; margin-bottom: 10px; }
+        .update-content { background: #1e1e1e; padding: 15px; border-radius: 8px; border: 1px solid #3d3d3d; }
+        .update-content ul { margin: 0; padding-left: 20px; }
+        .update-content li { margin-bottom: 5px; font-size: 0.95rem; }
+
+        .tag {
+            display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;
+            font-weight: bold; margin-right: 5px; text-transform: uppercase;
+        }
+        /* --- タグの色バリエーション --- */
+        .tag-plugin { background: #9b59b6; color: #fff; } /* 紫: プラグイン */
+        .tag-fix { background: #e67e22; color: #fff; }    /* 橙: 修正 */
+        .tag-new { background: #2ecc71; color: #fff; }    /* 緑: 新機能 */
+        .tag-news { background: #3498db; color: #fff; }    /* 青: お知らせ・イベント */
+        .tag-event { background: #3498db; color: #fff; }    /* 青: お知らせ・イベント */
+        .tag-issue {background: #f1c40f; color: #000; }     /* 黄色背景には黒文字の方が見やすいです */
+
+        .btn-back { display: block; text-align: center; margin-top: 2rem; color: #aaa; text-decoration: none; font-size: 0.9rem; }
+        .btn-back:hover { color: #fff; }
+
+        /* --- 自動アニメーションディレイ --- */
+        .animate-in { 
+            animation: fadeInUp 0.6s ease-out both; 
+        }
+
+        /* 1番目から10番目まで、自動的に0.1秒ずつズラして表示 */
+        .update-item:nth-child(1) { animation-delay: 0.1s; }
+        .update-item:nth-child(2) { animation-delay: 0.2s; }
+        .update-item:nth-child(3) { animation-delay: 0.3s; }
+        .update-item:nth-child(4) { animation-delay: 0.4s; }
+        .update-item:nth-child(5) { animation-delay: 0.5s; }
+        .update-item:nth-child(6) { animation-delay: 0.6s; }
+        .update-item:nth-child(7) { animation-delay: 0.7s; }
+        .update-item:nth-child(8) { animation-delay: 0.8s; }
+        .update-item:nth-child(9) { animation-delay: 0.9s; }
+        .update-item:nth-child(10) { animation-delay: 1.0s; }
+        .update-item:nth-child(n+11) { animation-delay: 1.1s; }
+/* --- ページヘッダーのレイアウト --- */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #3d3d3d;
+    margin-top: 1.5rem;
+    padding-bottom: 1.0rem; /* 下線を文字から少し離す */
+    margin-bottom: 2rem;    /* ★ここ！最初のニュースとの間に空白を作る */
+}
+
+/* ヘッダー内のタイトル */
+.page-header h1 {
+    margin: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+    font-size: 1.5rem;
+    color: #3fb0ac;
+}
+
+/* ヘッダー用の戻るボタン */
+.btn-back-header {
+    text-decoration: none;
+    color: #3fb0ac;
+    font-size: 0.85rem;
+    font-weight: bold;
+    padding: 6px 14px;
+    border: 1.5px solid #3fb0ac;
+    border-radius: 20px; /* 少し丸みを持たせてモダンに */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+}
+
+.btn-back-header:hover {
+    background: #3fb0ac;
+    color: #ffffff;
+    transform: translateX(-3px);
+    box-shadow: 0 4px 10px rgba(63, 176, 172, 0.3);
+}
+
+/* フッター（一番下）の戻るボタンも少し控えめに配置 */
+.footer-area {
+    margin-top: 2rem;
+    text-align: center;
+    border-top: 1px solid #3d3d3d;
+    padding-top: 1.5rem;
+}
+
+.btn-back-footer {
+    color: #888;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.btn-back-footer:hover { color: #3fb0ac; }
+    </style>
+</head>
+<body>
+
+<div class="container animate-in">
+    <div class="page-header">
+        <h1>Updates & News</h1>
+        <a href="index.html" class="btn-back-header">← 戻る</a>
+    </div>
+
+    <div id="update-list"></div>
+
+    <div class="footer-area">
+        <a href="index.html" class="btn-back-footer">← ホームへ戻る</a>
+    </div>
+</div>
+
+<script>
+    // 1. 既読判定用（さっきの仕組み）
+    const params = new URLSearchParams(window.location.search);
+    const dateFromUrl = params.get('date');
+    if (dateFromUrl) localStorage.setItem('lastViewedUpdate', dateFromUrl);
+
+    // 2. JSONを読み込んで表示する
+    async function loadUpdates() {
+        try {
+            const response = await fetch('updates.json');
+            const data = await response.json();
+            const listContainer = document.getElementById('update-list');
+        
+            // --- タグの表示名と使い分けの定義 ---
+        const tagLabels = {
+            "news": "NEWS",      // 【お知らせ】イベント告知、メンテナンス予定、運営からの重要告知など
+            "plugin": "PLUGIN",  // 【システム】新しいプラグインの導入、既存機能の設定変更、仕様変更など
+            "fix": "FIX",       // 【不具合修正】バグの修正、ラグの解消、設定ミスなどの直しなど
+            "new": "NEW",       // 【新要素】新ワールド開放、新ロビー完成、新しいアイテム配布など
+            "event": "EVENT",    // 【イベント】期間限定企画、参加型コンテストなどの特別な催し
+            "issue": "ISSUE"     // 【調査中/確認済み】ユーザーから報告を受け、現在対応中の不具合
+        };
+        
+            data.forEach((item, index) => {
+                // tagLabelが辞書にあればそれを使い、なければtagをそのまま大文字にして表示
+                const displayTag = tagLabels[item.tag] || item.tag.toUpperCase();
+            
+                const updateHtml = `
+                    <div class="update-item animate-in" style="animation-delay: ${0.1 * (index + 1)}s">
+                        <div class="update-date">${item.date}</div>
+                        <div class="update-title">
+                            <span class="tag tag-${item.tag}">${displayTag}</span>
+                            ${item.title}
+                        </div>
+                        <div class="update-content">
+                            <ul>
+                                ${item.contents.map(text => `<li>${text}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                listContainer.insertAdjacentHTML('beforeend', updateHtml);
+            });
+        } catch (error) {
+            console.error("データの読み込みに失敗しました:", error);
+        }
+    }
+
+    loadUpdates();
+</script>
+
+</body>
+</html>

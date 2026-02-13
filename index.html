@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MinecraftServer - ホーム</title>
-    <style>
+<style>
         /* --- アニメーション --- */
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         .animate-in { animation: fadeInUp 0.8s ease-out both; }
@@ -33,52 +33,113 @@
         }
         .is-error h1 { color: #ffa500; }
 
-        .button-group { margin: 2rem 0; display: flex; gap: 15px; flex-wrap: wrap; }
+        /* --- レイアウト構造 --- */
+        .button-group { margin: 2rem 0; display: flex; flex-direction: column; gap: 15px; }
+        .row-full { width: 100%; display: flex; }
+        .row-split { width: 100%; display: flex; gap: 15px; }
+
+        .btn-container { position: relative; flex: 1; display: flex; }
 
         .btn {
             display: inline-block; padding: 14px 24px; text-decoration: none;
-            border-radius: 8px; font-weight: bold; text-align: center; flex: 1; min-width: 200px;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 8px; font-weight: bold; text-align: center; flex: 1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-sizing: border-box; border: 2px solid transparent; /* 高さ合わせ用 */
         }
+
+        /* ホバーとアクティブの動きをシンプルに定義 */
+        .btn:hover, .btn-container:hover { transform: translateY(-3px); }
+        .btn:active, .btn-container:active { transform: translateY(-1px); transition: 0.1s; }
 
         .btn-primary { background: #3fb0ac; color: #ffffff; box-shadow: 0 4px 15px rgba(63, 176, 172, 0.3); }
         .btn-primary.error-mode { background: #ffa500; box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4); }
 
-        .btn-secondary { border: 2px solid #3fb0ac; color: #3fb0ac; }
+        .btn-secondary { border: 2px solid #3fb0ac; color: #3fb0ac; background: transparent; }
         .is-error .btn-secondary { border-color: #ffa500; color: #ffa500; }
 
+        /* --- 装飾系 --- */
         .status-badge { display: inline-block; padding: 8px 16px; border-radius: 50px; font-size: 0.9rem; font-weight: bold; transition: all 0.8s ease; }
         .status-ok { background: rgba(46, 125, 50, 0.2); color: #81c784; border: 1px solid #2e7d32; }
         .status-error { background: rgba(198, 40, 40, 0.2); color: #ef9a9a; border: 1px solid #c62828; animation: pulse 2s infinite; }
         
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        
         #status-notice { width: 100%; font-size: 0.85rem; margin-bottom: 8px; font-weight: bold; transition: all 0.5s ease; opacity: 0; display: none;}
         #status-notice.show { opacity: 1; display: block; color: #ffa500; }
+
+        .new-badge {
+            position: absolute; top: -10px; right: -5px;
+            background: #ff4757; color: white; font-size: 0.7rem; font-weight: bold;
+            padding: 2px 8px; border-radius: 20px; box-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+            z-index: 10; animation: bounce 2s infinite; display: none;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-5px);}
+            60% {transform: translateY(-3px);}
+        }
+
+        /* モバイル対応（横並びを縦にする） */
+        @media (max-width: 480px) { .row-split { flex-direction: column; } }
     </style>
 </head>
 <body>
-
 <div class="container animate-in" id="main-card">
     <div class="animate-in delay-1">
-        <h1>お知らせ</h1>
+        <h1>🏠 NamasuteProjectホームページ</h1>
         <p>サーバーに関する最新情報をお届けします。<br>不具合かな？と思ったらまずはここを見てください。</p>
     </div>
 
-    <div class="button-group animate-in delay-2">
-        <div id="status-notice">※現在サーバーに接続できない可能性があります</div>
+<div class="button-group animate-in delay-2">
+    <div id="status-notice">※現在サーバーに接続できない可能性があります</div>
+
+    <div class="row-full">
         <a href="HealthCheck.html" id="health-btn" class="btn btn-primary">📡 サーバー稼働状況を確認</a>
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfYpRkqudUwY7FUMfVmwwBVFq3KMSIQOSIZdLeGIoXcnQAYbg/viewform?usp=header" class="btn btn-secondary">⚠️ 不具合を報告する</a>
     </div>
 
+    <div class="row-split">
+        <div class="btn-container">
+            <span id="update-badge" class="new-badge">NEW!</span>
+            <a href="Updates.html" id="update-btn" class="btn btn-secondary">🛠️ アップデート情報</a>
+        </div>
+
+        <div class="btn-container">
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfYpRkqudUwY7FUMfVmwwBVFq3KMSIQOSIZdLeGIoXcnQAYbg/viewform?usp=header" class="btn btn-secondary">⚠️ 不具合を報告する</a>
+        </div>
+    </div>
+</div>
+
     <div class="animate-in delay-3">
-        <h1>発生中の問題</h1>
+        <h1>⛏️ 発生中の問題</h1>
         <p><span id="issue-badge" class="status-badge status-ok">ステータス確認中...</span></p>
     </div>
 </div>
 
 <script>
+// --- 自動既読判定の設定 ---
+// アップデートを更新したら、ここを書き換えるだけでOK！
+const LAST_UPDATE_DATE = 20260213; 
+
+function checkNewUpdate() {
+    const badge = document.getElementById('update-badge');
+    const updateLink = document.getElementById('update-btn'); // IDをボタンに付ける
+    
+    // 1. ボタンのリンクに日付を自動でくっつける
+    updateLink.href = `Updates.html?date=${LAST_UPDATE_DATE}`;
+
+    // 2. 既読判定
+    const lastViewed = localStorage.getItem('lastViewedUpdate') || 0;
+    if (LAST_UPDATE_DATE > parseInt(lastViewed)) {
+        badge.style.display = 'block';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+checkNewUpdate();
+    
     const serverIP = 'namasutee.duckdns.org:3315'; // ★DuckDNSのアドレス
-    const hasIssue = true; // 手動メンテフラグ
+    const hasIssue = false; // 手動メンテフラグ
     const manualMessage = "現在アップデートメンテナンス中です。メンテナンス終了推定時刻は20:30です。予想外のバグにつき時間が伸びております。";
 
     // 二重化されたステータスチェック関数
