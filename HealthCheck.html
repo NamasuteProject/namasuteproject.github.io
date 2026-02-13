@@ -111,47 +111,54 @@
 
 <script>
     const serverIP = 'namasutee.duckdns.org:3315'; // ★ここを自分のIPに書き換え
-
+    
     async function updateStatus() {
-        const statusEl = document.getElementById('server-status');
-        const onlineEl = document.getElementById('player-online');
-        const maxEl = document.getElementById('player-max');
-        const detailBox = document.getElementById('maintenance-detail');
-        const detailText = document.getElementById('detail-text');
-        
-        // IP表示を更新
-        document.getElementById('server-ip-display').innerText = serverIP;
+            const statusEl = document.getElementById('server-status');
+            const onlineEl = document.getElementById('player-online');
+            const maxEl = document.getElementById('player-max');
+            const detailBox = document.getElementById('maintenance-detail');
+            const detailText = document.getElementById('detail-text');
 
-        const params = new URLSearchParams(window.location.search);
-        const isMaintenance = params.get('maintenance') === 'true';
-        const reason = params.get('reason');
+            document.getElementById('server-ip-display').innerText = serverIP;
 
-        if (isMaintenance) {
-            statusEl.innerText = 'メンテナンス中';
-            statusEl.className = 'indicator offline';
-            onlineEl.innerText = '-';
-            maxEl.innerText = '-';
-            if (reason) {
-                detailBox.style.display = 'block';
-                detailText.innerText = decodeURIComponent(reason);
-            }
-            return;
-        }
+            const params = new URLSearchParams(window.location.search);
+            const isMaintenance = params.get('maintenance') === 'true';
+            const reason = params.get('reason');
 
-        try {
-            const response = await fetch(`https://api.mcsrvstat.us/2/${serverIP}`);
-            const data = await response.json();
-            if (data.online) {
-                statusEl.innerText = '稼働中';
-                statusEl.className = 'indicator online';
-                onlineEl.innerText = data.players.online;
-                maxEl.innerText = data.players.max;
-            } else {
-                statusEl.innerText = 'オフライン';
+            if (isMaintenance) {
+                statusEl.innerText = 'メンテナンス中';
                 statusEl.className = 'indicator offline';
+                onlineEl.innerText = '-';
+                maxEl.innerText = '-';
+                if (reason) {
+                    detailBox.style.display = 'block';
+                    detailText.innerText = decodeURIComponent(reason);
+                }
+                return;
             }
-        } catch (e) { statusEl.innerText = 'エラー'; }
-    }
+
+            try {
+                // mcapi.us を使用
+                const response = await fetch(`https://mcapi.us/server/status?ip=${serverIP}`);
+                const data = await response.json();
+
+                if (data.online) {
+                    statusEl.innerText = '稼働中';
+                    statusEl.className = 'indicator online';
+                    // mcapi.us では 'now' が現在の人数です
+                    onlineEl.innerText = data.players.now; 
+                    maxEl.innerText = data.players.max;
+                } else {
+                    statusEl.innerText = 'オフライン';
+                    statusEl.className = 'indicator offline';
+                    onlineEl.innerText = '0';
+                    maxEl.innerText = '0';
+                }
+            } catch (e) { 
+                statusEl.innerText = 'エラー'; 
+                console.error(e);
+            }
+        }
 
     // コピー機能（textarea作成方式に差し戻し）
     function copyIP() {
