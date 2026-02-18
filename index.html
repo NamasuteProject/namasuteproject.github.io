@@ -118,24 +118,38 @@
 
 <script>
 // --- 自動既読判定の設定 ---
-// アップデートを更新したら、ここを書き換えるだけでOK！
-const LAST_UPDATE_DATE = 20260218; 
-
-function checkNewUpdate() {
+async function checkNewUpdate() {
     const badge = document.getElementById('update-badge');
-    const updateLink = document.getElementById('update-btn'); // IDをボタンに付ける
-    
-    // 1. ボタンのリンクに日付を自動でくっつける
-    updateLink.href = `Updates.html?date=${LAST_UPDATE_DATE}`;
+    const updateLink = document.getElementById('update-btn');
 
-    // 2. 既読判定
-    const lastViewed = localStorage.getItem('lastViewedUpdate') || 0;
-    if (LAST_UPDATE_DATE > parseInt(lastViewed)) {
-        badge.style.display = 'block';
-    } else {
-        badge.style.display = 'none';
+    try {
+        // 1. JSONファイルを読み込む
+        const response = await fetch('updates.json');
+        const data = await response.json();
+
+        if (data.length > 0) {
+            // 2. 一番上のデータ（最新）の日付を取得
+            // JSONのdateは "2026.02.13" なので、ドットを消して数値にする
+            const latestDateStr = data[0].date.replace(/\./g, '');
+            const latestDateNum = parseInt(latestDateStr);
+
+            // 3. ボタンのリンクに最新日付を自動付与
+            updateLink.href = `Updates.html?date=${latestDateNum}`;
+
+            // 4. 既読判定
+            const lastViewed = localStorage.getItem('lastViewedUpdate') || 0;
+            if (latestDateNum > parseInt(lastViewed)) {
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    } catch (error) {
+        console.error("既読判定用のJSON読み込みに失敗しました:", error);
     }
 }
+
+// ページ読み込み時に実行
 checkNewUpdate();
     
     const serverIP = 'namasutee.duckdns.org:3315'; // ★DuckDNSのアドレス
