@@ -55,6 +55,11 @@
         .tag-news { background: #3498db; color: #fff; }    /* 青: お知らせ・イベント */
         .tag-event { background: #3498db; color: #fff; }    /* 青: お知らせ・イベント */
         .tag-issue {background: #f1c40f; color: #000; }     /* 黄色背景には黒文字の方が見やすいです */
+        /* --- タグの色バリエーション --- */
+        .tag-maintenance { 
+            background: #7f8c8d; /* シックなグレー */
+            color: #fff; 
+        }
 
         .btn-back { display: block; text-align: center; margin-top: 2rem; color: #aaa; text-decoration: none; font-size: 0.9rem; }
         .btn-back:hover { color: #fff; }
@@ -167,7 +172,8 @@
             "fix": "FIX",       // 【不具合修正】バグの修正、ラグの解消、設定ミスなどの直しなど
             "new": "NEW",       // 【新要素】新ワールド開放、新ロビー完成、新しいアイテム配布など
             "event": "EVENT",    // 【イベント】期間限定企画、参加型コンテストなどの特別な催し
-            "issue": "ISSUE"     // 【調査中/確認済み】ユーザーから報告を受け、現在対応中の不具合
+            "issue": "ISSUE",     // 【調査中/確認済み】ユーザーから報告を受け、現在対応中の不具合
+            "maintenance": "MAINTENANCE" // 【メンテナンス】定期メンテナンス、緊急サーバー停止など
         };
         
             data.forEach((item, index) => {
