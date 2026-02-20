@@ -7,7 +7,10 @@
     <style>
         /* --- アニメーション --- */
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOutDown { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(30px); } }
+        
         .animate-in { animation: fadeInUp 0.8s ease-out both; }
+        .animate-out { animation: fadeOutDown 0.4s ease-in both !important; }
         .delay-1 { animation-delay: 0.2s; }
         .delay-2 { animation-delay: 0.4s; }
 
@@ -15,6 +18,7 @@
             font-family: 'Helvetica Neue', Arial, sans-serif;
             background-color: #1a1a1a; color: #e0e0e0;
             margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            overflow: hidden; /* iframe内でのスクロールバー対策 */
         }
 
         .container {
@@ -40,7 +44,7 @@
         .offline { color: #e57373; background: rgba(229, 115, 115, 0.1); border: 1px solid #c62828; }
         .player-count { font-size: 1.8rem; color: #fff; font-weight: bold; }
 
-        /* --- メンテナンス詳細（吹き出し風） --- */
+        /* --- メンテナンス詳細 --- */
         .detail-box {
             background: rgba(255, 165, 0, 0.1); border-left: 4px solid #ffa500;
             padding: 15px; margin: 1rem 0; border-radius: 4px; display: none;
@@ -48,7 +52,7 @@
         .detail-box h3 { margin: 0 0 5px 0; font-size: 0.9rem; color: #ffa500; }
         .detail-box p { margin: 0; font-size: 0.95rem; line-height: 1.4; }
 
-        /* --- コピーセクション（書式を完全復元） --- */
+        /* --- コピーセクション --- */
         .copy-section {
             background: #252525; border-radius: 10px; padding: 15px;
             margin: 1.5rem 0; border: 1px dashed #555; cursor: pointer;
@@ -61,7 +65,6 @@
         }
         .copy-hint { font-size: 0.75rem; color: #777; }
 
-        /* コピー完了ツールチップ */
         .tooltip {
             position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
             background: #ffa500; color: #000; padding: 5px 12px; border-radius: 4px;
@@ -69,13 +72,19 @@
         }
         .tooltip.show { opacity: 1; }
 
-        .btn-back { display: block; text-align: center; margin-top: 1.5rem; color: #aaa; text-decoration: none; font-size: 0.9rem; }
+        .btn-back { display: block; text-align: center; margin-top: 1.5rem; color: #aaa; text-decoration: none; font-size: 0.9rem; cursor: pointer; }
         .btn-back:hover { color: #fff; }
+
+        /* 少し遅らせて開始することで、親が沈むのと入れ替わりで出てくるように見える */
+        .animate-in { 
+            animation: fadeInUp 0.6s ease-out both;
+            animation-delay: 0.1s; 
+        }
     </style>
 </head>
 <body>
 
-<div class="container animate-in">
+<div class="container animate-in" id="health-container">
     <div class="animate-in delay-1">
         <h1>Server Status</h1>
         <p>現在のサーバー稼働状況を確認できます。</p>
@@ -106,46 +115,48 @@
         <span class="copy-hint">サーバーアドレスをコピーする</span>
     </div>
 
-    <a href="index.html" class="btn-back animate-in delay-2">← ホームへ戻る</a>
+    <a href="javascript:void(0)" onclick="closePageWithAnimation()" class="btn-back animate-in delay-2">← ホームへ戻る</a>
 </div>
 
 <script>
-    const serverIP = 'namasutee.duckdns.org:3315';
+    const serverIP = 'namasutee.duckdns.org:3315'; // ★DuckDNSのアドレス
 
-async function getStatusWithFallback() {
-    const timestamp = Date.now();
+// 各子ページの closePageWithAnimation 関数（再確認用）
+function closePageWithAnimation() {
+    const container = document.querySelector('.container');
+    container.classList.add('animate-out'); // 下に消えるアニメーション
     
-    // 両方のリクエストを投げる
-    const requests = [
-        fetch(`https://api.mcsrvstat.us/3/${serverIP}?cache=${timestamp}`).then(res => res.json()),
-        fetch(`https://mcapi.us/server/status?ip=${serverIP}&_=${timestamp}`).then(res => res.json())
-    ];
-
-    // 両方の結果を待つ（Promise.allSettled を使うと片方がエラーでも止まらない）
-    const results = await Promise.allSettled(requests);
-    
-    let bestResult = { online: false, players: 0, max: 0 };
-
-    results.forEach(result => {
-        if (result.status === 'fulfilled') {
-            const data = result.value;
-            // mcsrvstat.us の形式
-            if (data.online && data.players) {
-                if (data.players.online >= bestResult.players) {
-                    bestResult = { online: true, players: data.players.online, max: data.players.max };
-                }
-            }
-            // mcapi.us の形式
-            if (data.online && data.players && data.players.now !== undefined) {
-                if (data.players.now >= bestResult.players) {
-                    bestResult = { online: true, players: data.players.now, max: data.players.max };
-                }
-            }
+    setTimeout(() => {
+        if (window.parent && window.parent.closePage) {
+            window.parent.closePage(); // 親の closePage() を実行
         }
-    });
-
-    return bestResult;
+    }, 350);
 }
+
+    async function getStatusWithFallback() {
+        const timestamp = Date.now();
+        const requests = [
+            fetch(`https://api.mcsrvstat.us/3/${serverIP}?cache=${timestamp}`).then(res => res.json()),
+            fetch(`https://mcapi.us/server/status?ip=${serverIP}&_=${timestamp}`).then(res => res.json())
+        ];
+
+        const results = await Promise.allSettled(requests);
+        let bestResult = { online: false, players: 0, max: 0 };
+
+        results.forEach(result => {
+            if (result.status === 'fulfilled') {
+                const data = result.value;
+                if (data.online && data.players) {
+                    const online = data.players.online !== undefined ? data.players.online : data.players.now;
+                    if (online >= bestResult.players) {
+                        bestResult = { online: true, players: online, max: data.players.max };
+                    }
+                }
+            }
+        });
+        return bestResult;
+    }
+
     async function updateStatus() {
         const statusEl = document.getElementById('server-status');
         const onlineEl = document.getElementById('player-online');
@@ -197,7 +208,7 @@ async function getStatusWithFallback() {
     }
 
     updateStatus();
-    setInterval(updateStatus, 60000); // 1分ごとに自動更新
+    setInterval(updateStatus, 60000);
 </script>
 
 </body>

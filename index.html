@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MinecraftServer - ホーム</title>
+    <title>NamasuteProject - ホーム</title>
 <style>
         /* --- アニメーション --- */
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
@@ -37,20 +37,55 @@
         .button-group { margin: 2rem 0; display: flex; flex-direction: column; gap: 15px; }
         .row-full { width: 100%; display: flex; }
         .row-split { width: 100%; display: flex; gap: 15px; }
+/* --- レイアウト構造（痙攣・不動対策 決定版） --- */
 
-        .btn-container { position: relative; flex: 1; display: flex; }
+/* 1. 当たり判定を固定する親要素の設定 */
+.row-full, .btn-container { 
+    position: relative; 
+    flex: 1; 
+    display: flex; 
+    /* 親要素自体は絶対に動かさない */
+    transform: none !important; 
+    /* 下側にマウスが外れても判定が途切れないよう、少しだけパディングを持たせる（任意） */
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}
 
-        .btn {
-            display: inline-block; padding: 14px 24px; text-decoration: none;
-            border-radius: 8px; font-weight: bold; text-align: center; flex: 1;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-sizing: border-box; border: 2px solid transparent; /* 高さ合わせ用 */
-        }
+/* 2. ボタン自体の基本設定 */
+.btn {
+    display: inline-block; 
+    padding: 14px 24px; 
+    text-decoration: none;
+    border-radius: 8px; 
+    font-weight: bold; 
+    text-align: center; 
+    flex: 1;
+    /* transition の対象を整理。transformに0.3sかける */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s, border-color 0.3s, box-shadow 0.3s;
+    box-sizing: border-box; 
+    border: 2px solid transparent;
+    /* ボタン単体でのホバーイベントを無効化（親に任せる） */
+    pointer-events: none; 
+}
 
-        /* ホバーとアクティブの動きをシンプルに定義 */
-        .btn:hover, .btn-container:hover { transform: translateY(-3px); }
-        .btn:active, .btn-container:active { transform: translateY(-1px); transition: 0.1s; }
+/* 3. 【重要】親要素にマウスが乗った時に、中のaタグだけを浮かす */
+.row-full:hover .btn, .btn-container:hover .btn { 
+    transform: translateY(-4px); /* 8px 浮かす */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    /* ホバー中もクリックはできるように戻す */
+    pointer-events: auto;
+}
 
+/* 4. 親要素がホバーされていない時でもクリックできるように設定 */
+.row-full a, .btn-container a {
+    pointer-events: auto;
+}
+
+/* 5. クリック時の押し込み設定 */
+.row-full:active .btn, .btn-container:active .btn { 
+    transform: translateY(-3px); 
+    transition: 0.1s; 
+}
         .btn-primary { background: #3fb0ac; color: #ffffff; box-shadow: 0 4px 15px rgba(63, 176, 172, 0.3); }
         .btn-primary.error-mode { background: #ffa500; box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4); }
 
@@ -80,9 +115,26 @@
             60% {transform: translateY(-3px);}
         }
 
-        /* モバイル対応（横並びを縦にする） */
+        /* --- 擬似SPA用オーバーレイ --- */
+        #page-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: #1a1a1a;
+            z-index: 9999; animation: overlayIn 0.3s ease-out forwards;
+        }
+        #overlay-frame { width: 100%; height: 100%; border: none; }
+        @keyframes overlayIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
         @media (max-width: 480px) { .row-split { flex-direction: column; } }
-    </style>
+
+        /* indexが沈む（消える）アニメーション */
+        @keyframes fadeDownOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(20px); }
+        }
+        .animate-out-to-child {
+            animation: fadeDownOut 0.4s ease-in both !important;
+        }
+</style>
 </head>
 <body>
 <div class="container animate-in" id="main-card">
@@ -95,17 +147,17 @@
     <div id="status-notice">※現在サーバーに接続できない可能性があります</div>
 
     <div class="row-full">
-        <a href="HealthCheck.html" id="health-btn" class="btn btn-primary">📡 サーバー稼働状況を確認</a>
+        <a href="javascript:void(0)" id="health-btn" onclick="openPage(this.getAttribute('data-url'))" data-url="HealthCheck.html" class="btn btn-primary">📡 サーバー稼働状況を確認</a>
     </div>
 
     <div class="row-split">
         <div class="btn-container">
             <span id="update-badge" class="new-badge">NEW!</span>
-            <a href="Updates.html" id="update-btn" class="btn btn-secondary">🛠️ アップデート情報</a>
+            <a href="javascript:void(0)" id="update-btn" onclick="openPage('Updates.html')" class="btn btn-secondary">🛠️ アップデート情報</a>
         </div>
 
         <div class="btn-container">
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfYpRkqudUwY7FUMfVmwwBVFq3KMSIQOSIZdLeGIoXcnQAYbg/viewform?usp=header" class="btn btn-secondary">⚠️ 不具合を報告する</a>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfYpRkqudUwY7FUMfVmwwBVFq3KMSIQOSIZdLeGIoXcnQAYbg/viewform?usp=header" target="_blank" class="btn btn-secondary">⚠️ 不具合を報告する</a>
         </div>
     </div>
 </div>
@@ -116,65 +168,88 @@
     </div>
 </div>
 
+<div id="page-overlay">
+    <iframe id="overlay-frame" name="overlay-frame"></iframe>
+</div>
+
 <script>
-// --- 自動既読判定の設定 ---
+// --- 擬似SPA制御用関数 ---
+function openPage(url) {
+    if(!url) return;
+    const overlay = document.getElementById('page-overlay');
+    const frame = document.getElementById('overlay-frame');
+    const mainCard = document.getElementById('main-card');
+
+    // 1. indexを下に沈ませる
+    mainCard.classList.remove('animate-in'); 
+    mainCard.classList.add('animate-out-to-child');
+
+    // 2. indexが完全に消えるのを待ってからオーバーレイを表示
+    setTimeout(() => {
+        // iframeの中身を入れ替えて表示
+        frame.contentWindow.location.replace(url);
+        overlay.style.display = 'block';
+    }, 350); 
+
+    if (url.includes('Updates.html')) {
+        const badge = document.getElementById('update-badge');
+        if (badge) badge.style.display = 'none';
+    }
+}
+
+function closePage() {
+    const overlay = document.getElementById('page-overlay');
+    const frame = document.getElementById('overlay-frame');
+    const mainCard = document.getElementById('main-card');
+
+    // 1. まずオーバーレイを消す
+    overlay.style.display = 'none';
+    frame.src = 'about:blank'; 
+
+    // 2. 沈ませる用クラスを「確実に」削除
+    mainCard.classList.remove('animate-out-to-child');
+    
+    // 3. アニメーションを強制リセットして再起動
+    mainCard.style.animation = 'none';
+    void mainCard.offsetWidth; // おまじない（ブラウザに再描画を強制させる）
+    mainCard.style.animation = 'fadeInUp 0.8s ease-out both';
+    
+    // もし opacity が 0 のまま固まるのを防ぐため、念のため上書き
+    mainCard.style.opacity = '1';
+}
+
+// --- 自動既読判定 ---
 async function checkNewUpdate() {
     const badge = document.getElementById('update-badge');
-    const updateLink = document.getElementById('update-btn');
-
     try {
-        // 1. JSONファイルを読み込む
         const response = await fetch('updates.json');
         const data = await response.json();
-
         if (data.length > 0) {
-            // 2. 一番上のデータ（最新）の日付を取得
-            // JSONのdateは "2026.02.13" なので、ドットを消して数値にする
-            const latestDateStr = data[0].date.replace(/\./g, '');
-            const latestDateNum = parseInt(latestDateStr);
+            // JSONの "2026.02.20" を 20260220 という数値に変換
+            const latestDateNum = parseInt(data[0].date.replace(/\./g, ''));
+            // 保存されている既読日を数値として取得
+            const lastViewed = parseInt(localStorage.getItem('lastViewedUpdate')) || 0;
 
-            // 3. ボタンのリンクに最新日付を自動付与
-            updateLink.href = `Updates.html?date=${latestDateNum}`;
-
-            // 4. 既読判定
-            const lastViewed = localStorage.getItem('lastViewedUpdate') || 0;
-            if (latestDateNum > parseInt(lastViewed)) {
+            // 最新の日付が既読の日付より大きい（新しい）場合のみ表示
+            if (latestDateNum > lastViewed) {
                 badge.style.display = 'block';
             } else {
                 badge.style.display = 'none';
             }
         }
-    } catch (error) {
-        console.error("既読判定用のJSON読み込みに失敗しました:", error);
-    }
+    } catch (error) { console.error("既読判定エラー:", error); }
 }
-
-// ページ読み込み時に実行
 checkNewUpdate();
     
     const serverIP = 'namasutee.duckdns.org:3315'; // ★DuckDNSのアドレス
-    const hasIssue = true; // 手動メンテフラグ
+    const hasIssue = false; 
     const manualMessage = "現在ボイスチャットメンテナンス中です。メンテナンス終了推定時刻は20:00です。";
 
-    // 二重化されたステータスチェック関数
     async function getStatusWithFallback() {
         const timestamp = Date.now();
-        const api1 = fetch(`https://api.mcsrvstat.us/3/${serverIP}?cache=${timestamp}`)
-            .then(res => res.json()).then(data => {
-                if (data.online) return { online: true };
-                throw "offline";
-            });
-        const api2 = fetch(`https://mcapi.us/server/status?ip=${serverIP}&_=${timestamp}`)
-            .then(res => res.json()).then(data => {
-                if (data.online) return { online: true };
-                throw "offline";
-            });
-
-        try {
-            return await Promise.any([api1, api2]);
-        } catch (e) {
-            return { online: false };
-        }
+        const api1 = fetch(`https://api.mcsrvstat.us/3/${serverIP}?cache=${timestamp}`).then(res => res.json()).then(data => { if (data.online) return { online: true }; throw "off"; });
+        const api2 = fetch(`https://mcapi.us/server/status?ip=${serverIP}&_=${timestamp}`).then(res => res.json()).then(data => { if (data.online) return { online: true }; throw "off"; });
+        try { return await Promise.any([api1, api2]); } catch (e) { return { online: false }; }
     }
 
     async function checkStatus() {
@@ -191,10 +266,7 @@ checkNewUpdate();
             displayMessage = manualMessage;
         } else {
             const result = await getStatusWithFallback();
-            if (!result.online) {
-                isAutoOffline = true;
-                displayMessage = "警告：現在サーバーがオフラインのようです";
-            }
+            if (!result.online) { isAutoOffline = true; displayMessage = "警告：現在サーバーがオフラインのようです"; }
         }
 
         if (isManualMaintenance || isAutoOffline) {
@@ -206,20 +278,21 @@ checkNewUpdate();
 
             if (isManualMaintenance) {
                 const encodedReason = encodeURIComponent(manualMessage);
-                healthBtn.href = `HealthCheck.html?maintenance=true&reason=${encodedReason}`;
+                healthBtn.setAttribute('data-url', `HealthCheck.html?maintenance=true&reason=${encodedReason}`);
             } else {
-                healthBtn.href = "HealthCheck.html";
+                healthBtn.setAttribute('data-url', "HealthCheck.html");
             }
         } else {
             card.classList.remove('is-error');
             healthBtn.classList.remove('error-mode');
-            healthBtn.href = "HealthCheck.html";
+            healthBtn.setAttribute('data-url', "HealthCheck.html");
             statusNotice.classList.remove('show');
             badge.innerText = "● 重大な問題は見つかっていません";
             badge.className = "status-badge status-ok";
         }
     }
     checkStatus();
+
 </script>
 </body>
 </html>

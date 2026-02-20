@@ -1,10 +1,12 @@
 [
   {
     "date": "2026.02.20",
-    "tag": "maintenance",
-    "title": "2月20日 19:30~20:00 サーバーメンテナンスのお知らせ",
+    "tag": "new",
+    "title": "2月20日 19:30~20:00 サーバーメンテナンス完了のお知らせ",
     "contents": [
-      "ボイスチャットを有効化しています。"
+      "ランチャーからだと全ての内容が表示されない可能性があるので、ホームページからご覧ください。",
+      "ボイスチャットを有効化しました。",
+      "https://github.com/NamasuteProject/namasuteproject.github.io/raw/refs/heads/main/Movies/NamasuteVoiceChat.mp4"
     ]
   },
   {
