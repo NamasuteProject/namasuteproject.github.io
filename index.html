@@ -153,8 +153,8 @@ async function checkNewUpdate() {
 checkNewUpdate();
     
     const serverIP = 'namasutee.duckdns.org:3315'; // ★DuckDNSのアドレス
-    const hasIssue = false; // 手動メンテフラグ
-    const manualMessage = "現在アップデートメンテナンス中です。メンテナンス終了推定時刻は20:30です。予想外のバグにつき時間が伸びております。";
+    const hasIssue = treu; // 手動メンテフラグ
+    const manualMessage = "現在ボイスチャットメンテナンス中です。メンテナンス終了推定時刻は20:00です。";
 
     // 二重化されたステータスチェック関数
     async function getStatusWithFallback() {
